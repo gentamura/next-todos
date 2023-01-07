@@ -1,2 +1,2 @@
 up:
-	docker compose --env-file .env.local up
+	docker compose up
