@@ -1,10 +1,12 @@
 import { ChangeEventHandler, useEffect } from 'react';
 import { useState } from 'react';
+import useAuth from '../hooks/useAuth';
 import { Todo } from '../types';
 
 const IndexPage = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [input, setInput] = useState('');
+  const { currentUser, isAuthLoading, logIn, logOut } = useAuth();
 
   useEffect(() => {
     const init = async () => {
@@ -17,6 +19,14 @@ const IndexPage = () => {
 
     init();
   }, []);
+
+  const handleLogIn = async () => {
+    await logIn();
+  };
+
+  const handleLogOut = async () => {
+    await logOut();
+  };
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const { value } = e.target;
@@ -56,27 +66,42 @@ const IndexPage = () => {
     }
   };
 
+  if (isAuthLoading) return 'Loading...';
+
   return (
     <>
       <h1>Todos</h1>
 
-      <div>
-        <input type="text" name="todo" onChange={handleChange} value={input} />
-        <button type="button" onClick={handleAdd}>
-          add
-        </button>
-      </div>
+      {currentUser ? (
+        <>
+          <button onClick={handleLogOut}>log out</button>
 
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>
-            {todo.content}
-            <button type="button" onClick={() => handleDelete(todo.id)}>
-              delete
+          <div>
+            <input
+              type="text"
+              name="todo"
+              onChange={handleChange}
+              value={input}
+            />
+            <button type="button" onClick={handleAdd}>
+              add
             </button>
-          </li>
-        ))}
-      </ul>
+          </div>
+
+          <ul>
+            {todos.map((todo) => (
+              <li key={todo.id}>
+                {todo.content}
+                <button type="button" onClick={() => handleDelete(todo.id)}>
+                  delete
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <button onClick={handleLogIn}>log in</button>
+      )}
     </>
   );
 };

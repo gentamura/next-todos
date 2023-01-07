@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../../prisma';
+import prisma from '../../../lib/prisma';
 
 const apiTodosId = async (req: NextApiRequest, res: NextApiResponse) => {
   const {
