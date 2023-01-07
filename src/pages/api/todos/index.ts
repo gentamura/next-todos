@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import type { Todo } from '../../../types';
-import { prisma } from '../../../db';
+import { prisma } from '../../../../prisma';
 
 type ResponseData =
   | {
