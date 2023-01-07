@@ -1,9 +1,22 @@
-import type { ChangeEventHandler } from 'react';
+import { ChangeEventHandler, useEffect } from 'react';
 import { useState } from 'react';
+import { Todo } from '../types';
 
 const IndexPage = () => {
-  const [todos, setTodos] = useState<string[]>([]);
+  const [todos, setTodos] = useState<Todo[]>([]);
   const [input, setInput] = useState('');
+
+  useEffect(() => {
+    const init = async () => {
+      const res = await fetch('http://localhost:3000/api/todos');
+      const data = await res.json();
+      const { todos } = data;
+
+      setTodos(todos);
+    };
+
+    init();
+  }, []);
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const { value } = e.target;
@@ -11,17 +24,36 @@ const IndexPage = () => {
     setInput(value);
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (input) {
-      setTodos((beforeTodos) => [...beforeTodos, input]);
+      const res = await fetch('http://localhost:3000/api/todos', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify({ content: input }),
+      });
+
+      const data = await res.json();
+      const { todo } = data;
+
+      setTodos((prevTodos) => [...prevTodos, todo]);
       setInput('');
     }
   };
 
-  const handleDelete = (index: number) => {
-    const deletedTodos = todos.filter((_, i) => i !== index);
+  const handleDelete = async (id: number) => {
+    if (confirm('Are you sure?')) {
+      await fetch(`http://localhost:3000/api/todos/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'DELETE',
+      });
 
-    setTodos(deletedTodos);
+      const deletedTodos = todos.filter((todo) => todo.id !== id);
+      setTodos(deletedTodos);
+    }
   };
 
   return (
@@ -36,10 +68,10 @@ const IndexPage = () => {
       </div>
 
       <ul>
-        {todos.map((todo, i) => (
-          <li key={i}>
-            {todo}
-            <button type="button" onClick={() => handleDelete(i)}>
+        {todos.map((todo) => (
+          <li key={todo.id}>
+            {todo.content}
+            <button type="button" onClick={() => handleDelete(todo.id)}>
               delete
             </button>
           </li>
